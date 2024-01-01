@@ -75,6 +75,7 @@ app.post("/api/logout",(req,res) => {
             if(tokenIndex!== -1){
                 allTokens.splice(tokenIndex,1)
                 res.status(200).json("Log out successfully")
+                res.redirect("/")
             }else{
                 res.status(400).json("you are not valid user")
             }
@@ -85,6 +86,6 @@ app.post("/api/logout",(req,res) => {
         res.status(400).json("you are not authenicated")
     }
 })
-app.listen("3000", () => {
-  console.log("Server started on http://localhost:3000");
+app.listen("3030", () => {
+  console.log("Server started on http://localhost:3030");
 });
