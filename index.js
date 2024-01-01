@@ -25,6 +25,21 @@ const users = [
   },
 ];
 
+const verifyAuth = (req,res,next) => {
+    const userToken = req.headers.authorization
+    if(userToken){
+        const token = userToken.split(" ")[1]
+        jwt.verify(token,process.env.SECRET_KEY,(err,user) => {
+            if(err){
+                return res.status(403).json({Error : 'Token is not valid'})
+            }
+            res.user = user
+            next()
+        })
+    }else{
+        res.status(401).json({error : "you are not authorized"})
+    }
+}
 app.post("/api/login",async (req, res) => {
   try {
     const { userName, password } = req.body;
@@ -41,6 +56,35 @@ app.post("/api/login",async (req, res) => {
     res.status(401).json({ message: err });
   }
 });
+
+app.delete("/api/users/:userId",verifyAuth,(req,res) => {
+    if(req.user.id === req.params.userId || req.user.isAdmin){
+        res.status(200).json({message : "user deleted succesfully"})
+    }else{
+        res.status(401).json({error : "not eligible"})
+    }
+})
+
+app.post("/api/logout",(req,res) => {
+    const userToken = req.headers.authorization
+    if(userToken){
+        const token = userToken.split(" ")[1]
+        if(token){
+            let allTokens = []
+            const tokenIndex = allTokens.indexOf(token)
+            if(tokenIndex!== -1){
+                allTokens.splice(tokenIndex,1)
+                res.status(200).json("Log out successfully")
+            }else{
+                res.status(400).json("you are not valid user")
+            }
+        }else{
+            res.status(400).json("token not found")
+        }
+    }else{
+        res.status(400).json("you are not authenicated")
+    }
+})
 app.listen("3000", () => {
   console.log("Server started on http://localhost:3000");
 });
